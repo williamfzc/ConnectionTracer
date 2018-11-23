@@ -1,9 +1,9 @@
-import adb_device_trace
+import ConnectionTracer
 
 
 def hook_function(devices):
     print(devices)
 
 
-adb_device_trace.start(hook_function)
+ConnectionTracer.start(hook_function)
 print('tracer already started :)')

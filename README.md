@@ -1,10 +1,29 @@
 # ConnectionTracer
 
+[![PyPI version](https://badge.fury.io/py/ConnectionTracer.svg)](https://badge.fury.io/py/ConnectionTracer)
+
 > when connected devices changed, do sth :)
 
 ## How it works?
 
 Use a socket to connect adb server. Nothing about `subprocess` or `os.system`.
+
+## How to use?
+
+```python
+import ConnectionTracer
+
+
+def hook_function(devices):
+    # devices is: current devices set
+    print(devices)
+
+
+ConnectionTracer.start(hook_function)
+print('tracer already started :)')
+```
+
+When connected devices changed, `hook_function` would be called.
 
 ## More?
 
