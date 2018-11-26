@@ -8,6 +8,12 @@
 
 Use a socket to connect adb server. Nothing about `subprocess` or `os.system`.
 
+## Installation
+
+```
+pip install ConnectionTracer 
+```
+
 ## How to use?
 
 ```python
