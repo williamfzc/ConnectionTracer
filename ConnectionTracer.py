@@ -6,16 +6,15 @@ HOST = '127.0.0.1'
 PORT = 5037
 ENCODING = 'utf-8'
 
+# GLOBAL CONNECTION
+adb_connection = None
+
 
 def connect():
     """ create socket and connect to adb server """
     client = socket.socket()
     client.connect((HOST, PORT))
     return client
-
-
-# connection to adb server
-adb_connection = connect()
 
 
 # start trace
@@ -25,33 +24,18 @@ def encode_data(data: str):
     return byte_length + byte_data
 
 
-# start track
-# all services were provided here:
-# https://android.googlesource.com/platform/system/core/+/jb-dev/adb/SERVICES.TXT
-ready_data = encode_data('host:track-devices')
-adb_connection.send(ready_data)
-
-
-def socket_reader():
+def socket_reader(connection):
     """ read data from adb socket """
-    while True:
-        buf = adb_connection.recv(1024)
+    while connection is not None:
+        try:
+            buf = connection.recv(1024)
+        except ConnectionAbortedError:
+            print('connection aborted')
+
         if not len(buf):
             # trace end
-            adb_connection.close()
+            connection.close()
         yield buf
-
-
-# get them
-status = adb_connection.recv(4)
-
-# make sure track is ready
-if status != b'OKAY':
-    raise RuntimeError('connection error, try to restart adb server?')
-
-# reader for socket
-# trace this reader
-reader = socket_reader()
 
 
 # decode adb response
@@ -70,8 +54,29 @@ def decode_response(content: bytes):
 
 
 def _start(hook: callable):
+    global adb_connection
+    # connection to adb server
+    adb_connection = connect()
+
+    # start track
+    # all services were provided here:
+    # https://android.googlesource.com/platform/system/core/+/jb-dev/adb/SERVICES.TXT
+    ready_data = encode_data('host:track-devices')
+    adb_connection.send(ready_data)
+
+    # get them
+    status = adb_connection.recv(4)
+
+    # make sure track is ready
+    if status != b'OKAY':
+        raise RuntimeError('connection error, try to restart adb server?')
+
+    # reader for socket
+    # trace this reader
+    reader = socket_reader(adb_connection)
+
     last_devices = set()
-    while True:
+    while adb_connection is not None:
         new_line = next(reader)
         current_devices = decode_response(new_line)
         if current_devices == last_devices:
@@ -82,12 +87,22 @@ def _start(hook: callable):
 
 # API
 def start(hook: callable):
+    if adb_connection is not None:
+        raise RuntimeError('Tracer instance already existed')
     detector = threading.Thread(target=_start, args=(hook,))
     detector.start()
     return detector
 
 
-# main
+def stop():
+    global adb_connection
+    adb_connection.close()
+    adb_connection = None
+
+
+# ALL CODE END
+
+# FOR TEST
 def _test_hook(devices):
     print(devices)
 
