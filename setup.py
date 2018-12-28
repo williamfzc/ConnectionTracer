@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ConnectionTracer',
-    version='0.2.2',
+    version='0.2.3',
     description='when connected devices changed, do sth :)',
     author='williamfzc',
     author_email='fengzc@vip.qq.com',
