@@ -23,6 +23,11 @@ def socket_reader(connection: socket, buffer_size: int = 1024):
             print('connection aborted')
             connection.close()
             yield None
+        except OSError:
+            # still operate connection after it was closed
+            print('socket closed')
+            connection.close()
+            yield None
         else:
             yield buffer
 
