@@ -35,6 +35,7 @@ def disconnect():
     global adb_socket
     if adb_socket is not None:
         adb_socket.close()
+        adb_socket = None
         return
     warnings.warn('connection already closed')
 
