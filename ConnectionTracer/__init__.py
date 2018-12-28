@@ -41,7 +41,12 @@ def _init():
 
 
 # API
-def start(hook: callable):
+def start(hook: callable, host=None, port=None):
+    config.HOST = host or config.HOST
+    config.PORT = port or config.PORT
+    print('adb host: ', config.HOST)
+    print('adb port: ', config.PORT)
+
     _init()
     tracer_thread = threading.Thread(target=_start, args=(hook,))
     tracer_thread.start()
@@ -51,8 +56,12 @@ def stop():
     connection.disconnect()
 
 
+get_status = connection.get_status
+
+
 __all__ = [
     'start',
     'stop',
     'config',
+    'get_status',
 ]

@@ -40,6 +40,12 @@ def disconnect():
     warnings.warn('connection already closed')
 
 
+def get_status():
+    """ get connection status: true or false """
+    global adb_socket
+    return adb_socket is not None
+
+
 def reboot_adb_server():
     """ execute 'adb devices' to start adb server """
     _reboot_count = 0
